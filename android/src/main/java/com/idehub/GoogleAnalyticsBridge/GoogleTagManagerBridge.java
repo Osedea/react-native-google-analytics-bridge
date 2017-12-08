@@ -59,11 +59,12 @@ public class GoogleTagManagerBridge extends ReactContextBaseJavaModule {
         }
 
         TagManager mTagManager = TagManager.getInstance(getReactApplicationContext());
-        //using -1 here because it can't access raw in app
         openOperationInProgress = true;
+
+        // Container retrieval. We can't use the R variable because this dep is compile BEFORE the R class generation
         Resources res = mContext.getResources();
-        int containerAssetId = res.getIdentifier("gtm-container", "raw", mContext.getPackageName());
-        Log.i("com.analytics", Integer.toString(containerAssetId));
+        int containerAssetId = res.getIdentifier("gtmcontainer", "raw", mContext.getPackageName());
+        Log.i("GoogleTagManager", "Resource retrieved : " + Integer.toString(containerAssetId));
         PendingResult<ContainerHolder> pending = mTagManager.loadContainerPreferFresh(containerId, containerAssetId);
         pending.setResultCallback(new ResultCallback<ContainerHolder>() {
             @Override
