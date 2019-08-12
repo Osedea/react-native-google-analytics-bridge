@@ -4,6 +4,7 @@ import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.google.android.gms.common.api.PendingResult;
@@ -11,15 +12,21 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.tagmanager.ContainerHolder;
 import com.google.android.gms.tagmanager.DataLayer;
 import com.google.android.gms.tagmanager.TagManager;
+import android.content.res.Resources;
+import android.util.Log;
 
+import java.lang.Exception;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class GoogleTagManagerBridge extends ReactContextBaseJavaModule {
+    ReactApplicationContext mContext;
 
     public GoogleTagManagerBridge(ReactApplicationContext reactContext, ContainerHolder containerHolder) {
         super(reactContext);
+        mContext = reactContext;
         mContainerHolder = containerHolder;
     }
 
@@ -52,9 +59,13 @@ public class GoogleTagManagerBridge extends ReactContextBaseJavaModule {
         }
 
         TagManager mTagManager = TagManager.getInstance(getReactApplicationContext());
-        //using -1 here because it can't access raw in app
         openOperationInProgress = true;
-        PendingResult<ContainerHolder> pending = mTagManager.loadContainerPreferFresh(containerId, -1);
+
+        // Container retrieval. We can't use the R variable because this dep is compile BEFORE the R class generation
+        Resources res = mContext.getResources();
+        int containerAssetId = res.getIdentifier("gtmcontainer", "raw", mContext.getPackageName());
+        Log.i("GoogleTagManager", "Resource retrieved : " + Integer.toString(containerAssetId));
+        PendingResult<ContainerHolder> pending = mTagManager.loadContainerPreferFresh(containerId, containerAssetId);
         pending.setResultCallback(new ResultCallback<ContainerHolder>() {
             @Override
             public void onResult(ContainerHolder containerHolder) {
